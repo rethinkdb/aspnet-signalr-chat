@@ -55,12 +55,12 @@ namespace RethinkDemoWindows
     {
         public static RethinkDB r = RethinkDB.r;
 
-        public static async Task HandleUpdates()
+        public static void HandleUpdates()
         {
             var hub = GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
             var conn = r.connection().connect();
-            var feed = await r.db("test").table("chat")
-                              .changes().runChangesAsync<ChatMessage>(conn);
+            var feed = r.db("test").table("chat")
+                              .changes().runChanges<ChatMessage>(conn);
 
             foreach (var message in feed)
                 hub.Clients.All.onMessage(
