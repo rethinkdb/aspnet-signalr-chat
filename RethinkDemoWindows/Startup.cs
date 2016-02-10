@@ -6,6 +6,7 @@ using Microsoft.AspNet.SignalR;
 using RethinkDb.Driver;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using RethinkDb.Driver.Net;
 
 [assembly: OwinStartup(typeof(RethinkDemoWindows.Startup))]
 
@@ -21,45 +22,47 @@ namespace RethinkDemoWindows
     public class ChatHub : Hub
     {
         public static RethinkDB r = RethinkDB.r;
+        static Connection conn;
+
+        internal static void Init()
+        {
+            conn = r.connection().connect();
+        }
 
         public void Send(string name, string message)
         {
-            var conn = r.connection().connect();
             r.db("test").table("chat")
              .insert(new ChatMessage {
                  username = name,
                  message = message,
                  timestamp = DateTime.Now
              }).run(conn);
-            conn.close();
         }
 
         public JArray History(int limit)
         {
-            var conn = r.connection().connect();
             var output = r.db("test").table("chat")
                           .orderBy(r.desc("timestamp"))
                           .limit(limit)
                           .orderBy("timestamp")
                           .coerceTo("array")
                           .run<JObject>(conn);
-            conn.close();
             return output;
         }
     }
 
-    class ChangeHandler
+    static class ChangeHandler
     {
         public static RethinkDB r = RethinkDB.r;
 
-        async public void handleUpdates()
+        public static void HandleUpdates()
         {
             var hub = GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
             var conn = r.connection().connect();
             var feed = r.db("test").table("chat")
-                        .changes().runChangesAsync<ChatMessage>(conn);
+                              .changes().runChanges<ChatMessage>(conn);
 
-            foreach (var message in await feed)
+            foreach (var message in feed)
                 hub.Clients.All.onMessage(
                     message.NewValue.username,
                     message.NewValue.message,
@@ -71,7 +74,12 @@ namespace RethinkDemoWindows
     {
         public void Configuration(IAppBuilder app)
         {
-            new ChangeHandler().handleUpdates();
+            ChatHub.Init();
+
+            Task.Factory.StartNew(
+                ChangeHandler.HandleUpdates,
+                TaskCreationOptions.LongRunning);
+            
             app.MapSignalR();
         }
     }
