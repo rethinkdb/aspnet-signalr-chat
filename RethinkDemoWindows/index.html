@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>RethinkDB SignalR Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.4/vue.min.js"></script>
+    <style>
+        body {
+          font-family: "Open Sans", sans-serif;
+          background: #F9FCFC;
+          margin: 0;
+        }
+
+        h1 {
+          background: #184b5a;
+          padding: 15px;
+          color: white;
+          margin: 0;
+          font-weight: 300;
+        }
+
+        .message {
+          margin: 10px;
+          color: #385A65;
+        }
+
+        .sender {
+          font-weight: bold;
+        }
+
+        .sender, .text {
+          display: inline-block;
+        }
+
+        .entry {
+            margin: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>RethinkDB Chat Demo</h1>
+
+    <div id="chat">
+        <div id="messages">
+            <div class="message" v-for="message in messages">
+                <div class="sender">{{message.username}}:</div>
+                <div class="text">{{message.message}}</div>
+            </div>
+        </div>
+
+        <div class="entry">
+            <input type="text" @keyup.enter="sendMessage" v-model="message" placeholder="Type message here">
+            <button @click="sendMessage">Send</button>
+        </div>
+    </div>
+
+    <script src="Scripts/jquery-1.10.2.min.js"></script>
+    <script src="Scripts/jquery.signalR-2.1.2.min.js"></script>
+    <script src="signalr/hubs"></script>
+
+    <script type="text/javascript">
+        var chat = $.connection.chatHub;
+
+        var app = new Vue({
+            el: "body",
+            data: {
+                username: null,
+                message: null,
+                messages: []
+            },
+            created: function () {
+                $.connection.hub.start().then(function () {
+                    chat.server.history(10).then(function (messages) {
+                        app.messages = messages;
+                    });
+                });
+            },
+            methods: {
+                onMessage: function (username, message, timestamp) {
+                    this.messages.push({ username: username, message: message });
+                },
+                sendMessage: function () {
+                    chat.server.send(this.username, this.message);
+                    this.message = null;
+                }
+            }
+        });
+
+        chat.client.onMessage = app.onMessage;
+        app.username = prompt("Enter your name:");
+    </script>
+</body>
+</html>
