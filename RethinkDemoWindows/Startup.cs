@@ -19,14 +19,14 @@ namespace RethinkDemoWindows
 
     static class ChangeHandler
     {
-        public static RethinkDB r = RethinkDB.r;
+        public static RethinkDB R = RethinkDB.R;
 
         public static void HandleUpdates()
         {
             var hub = GlobalHost.ConnectionManager.GetHubContext<ChatHub>();
-            var conn = r.connection().connect();
-            var feed = r.db("test").table("chat")
-                              .changes().runChanges<ChatMessage>(conn);
+            var conn = R.Connection().Connect();
+            var feed = R.Db("test").Table("chat")
+                              .Changes().RunChanges<ChatMessage>(conn);
 
             foreach (var message in feed)
                 hub.Clients.All.onMessage(

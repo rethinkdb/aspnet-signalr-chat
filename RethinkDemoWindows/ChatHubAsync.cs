@@ -9,32 +9,32 @@ namespace RethinkDemoWindows
 {
     public class ChatHubAsync : Hub
     {
-        public static RethinkDB r = RethinkDB.r;
+        public static RethinkDB R = RethinkDB.R;
         static Connection conn;
 
         internal static async Task Init()
         {
-            conn = await r.connection().connectAsync();
+            conn = await R.Connection().ConnectAsync();
         }
 
         public async Task Send(string name, string message)
         {
-            await r.db("test").table("chat")
-                    .insert(new ChatMessage
+            await R.Db("test").Table("chat")
+                    .Insert(new ChatMessage
                     {
                         username = name,
                         message = message,
                         timestamp = DateTime.Now
-                    }).runResultAsync(conn);
+                    }).RunResultAsync(conn);
         }
 
         public async Task<JArray> History(int limit)
         {
-            return await r.db("test").table("chat")
-                    .orderBy(r.desc("timestamp"))
-                    .limit(limit)
-                    .orderBy("timestamp")
-                    .runResultAsync<JArray>(conn);
+            return await R.Db("test").Table("chat")
+                    .OrderBy(R.Desc("timestamp"))
+                    .Limit(limit)
+                    .OrderBy("timestamp")
+                    .RunResultAsync<JArray>(conn);
         }
     }
 }
