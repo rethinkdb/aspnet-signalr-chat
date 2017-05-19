@@ -8,31 +8,31 @@ namespace RethinkDemoWindows
 {
     public class ChatHub : Hub
     {
-        public static RethinkDB r = RethinkDB.r;
+        public static RethinkDB R = RethinkDB.R;
         static Connection conn;
 
         internal static void Init()
         {
-            conn = r.connection().connect();
+            conn = R.Connection().Connect();
         }
 
         public void Send(string name, string message)
         {
-            r.db("test").table("chat")
-                .insert(new ChatMessage {
+            R.Db("test").Table("chat")
+                .Insert(new ChatMessage {
                     username = name,
                     message = message,
                     timestamp = DateTime.Now
-                }).run(conn);
+                }).Run(conn);
         }
 
         public JArray History(int limit)
         {
-            var output = r.db("test").table("chat")
-                .orderBy(r.desc("timestamp"))
-                .limit(limit)
-                .orderBy("timestamp")
-                .runResult<JArray>(conn);
+            var output = R.Db("test").Table("chat")
+                .OrderBy(R.Desc("timestamp"))
+                .Limit(limit)
+                .OrderBy("timestamp")
+                .RunResult<JArray>(conn);
             return output;
         }
     }

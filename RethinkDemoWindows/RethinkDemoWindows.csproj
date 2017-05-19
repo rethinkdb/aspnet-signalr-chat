@@ -116,8 +116,8 @@
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RethinkDb.Driver, Version=2.2.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RethinkDb.Driver.2.2.4\lib\net45\RethinkDb.Driver.dll</HintPath>
+    <Reference Include="RethinkDb.Driver, Version=2.2.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RethinkDb.Driver.2.2.10\lib\net45\RethinkDb.Driver.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
